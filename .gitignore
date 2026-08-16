@@ -1,0 +1,74 @@
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# IDE / Editor
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# Backend (Laravel)
+# ============================================
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/.env.backup
+backend/.env.production
+backend/storage/logs/*.log
+backend/storage/framework/cache/data/
+backend/storage/framework/sessions/
+backend/storage/framework/testing/
+backend/storage/framework/views/
+backend/bootstrap/cache/
+backend/public/storage
+backend/public/hot
+backend/public/css/maps/
+backend/public/js/maps/
+backend/.phpunit.result.cache
+backend/.phpunit.cache
+
+# ============================================
+# Frontend (Vue.js)
+# ============================================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/.vite/
+frontend/.cache/
+
+# ============================================
+# Environment Variables (NEVER COMMIT)
+# ============================================
+.env
+.env.*
+!.env.example
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.bak
+*.swp
+*.zip
+*.tar.gz
