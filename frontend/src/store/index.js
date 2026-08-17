@@ -1,17 +1,13 @@
 import { createStore } from 'vuex'
 import authModule from './modules/auth'
+import categoriesModule from './modules/categories'
+import tasksModule from './modules/tasks'
 
 const store = createStore({
-  state: () => ({
-  }),
-  mutations: {
-  },
-  actions: {
-  },
-  getters: {
-  },
   modules: {
     auth: authModule,
+    categories: categoriesModule,
+    tasks: tasksModule,
   },
 })
 

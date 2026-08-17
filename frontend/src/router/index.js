@@ -3,6 +3,8 @@ import store from '@/store'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import DashboardView from '@/views/DashboardView.vue'
+import CategoriesView from '@/views/CategoriesView.vue'
+import TasksView from '@/views/TasksView.vue'
 
 const routes = [
   {
@@ -25,6 +27,18 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: DashboardView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/categories',
+    name: 'categories',
+    component: CategoriesView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/tasks',
+    name: 'tasks',
+    component: TasksView,
     meta: { requiresAuth: true },
   },
 ]

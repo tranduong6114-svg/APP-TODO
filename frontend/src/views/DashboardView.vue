@@ -1,20 +1,19 @@
 <template>
   <div class="dashboard">
-    <h1>Welcome, {{ user?.name }}</h1>
-    <p>You are logged in!</p>
+    <h1>Dashboard</h1>
+    <p>You are logged in as <strong>{{ userName }}</strong>!</p>
+    <p>Use the navigation above to manage your categories and tasks.</p>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 const store = useStore()
-const router = useRouter()
 
-const user = computed(() => store.getters['auth/user'])
 const isAuthenticated = computed(() => store.getters['auth/isAuthenticated'])
+const userName = computed(() => store.state.auth.user?.name || 'User')
 
 onMounted(async () => {
   if (!isAuthenticated.value) {
@@ -26,5 +25,9 @@ onMounted(async () => {
 <style scoped>
 .dashboard {
   padding: 20px;
+}
+.dashboard p {
+  margin-top: 10px;
+  color: #666;
 }
 </style>

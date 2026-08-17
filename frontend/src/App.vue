@@ -1,6 +1,9 @@
 <template>
   <div id="app">
     <nav v-if="isAuthenticated">
+      <router-link to="/dashboard">Dashboard</router-link>
+      <router-link to="/categories">Categories</router-link>
+      <router-link to="/tasks">Tasks</router-link>
       <span>Welcome, {{ user?.name }}</span>
       <button @click="handleLogout">Logout</button>
     </nav>
@@ -32,13 +35,25 @@ const handleLogout = async () => {
 }
 nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 15px;
   padding: 10px;
   background: #f5f5f5;
   margin-bottom: 20px;
 }
-button {
+nav a {
+  text-decoration: none;
+  color: #333;
+  padding: 5px 10px;
+}
+nav a.router-link-active {
+  background: #ddd;
+  border-radius: 4px;
+}
+nav span {
+  margin-left: auto;
+}
+nav button {
   padding: 6px 12px;
 }
 </style>

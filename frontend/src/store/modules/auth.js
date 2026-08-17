@@ -1,22 +1,34 @@
 import api from '@/plugins/axios'
 
+const getInitialUser = () => {
+  try {
+    const stored = localStorage.getItem('auth_user')
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
+}
+
 const authModule = {
   namespaced: true,
 
   state: () => ({
-    user: JSON.parse(localStorage.getItem('auth_user')) || null,
+    user: getInitialUser(),
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.user,
+    isAuthenticated: (state) => !!state.user && !!state.user.id,
     user: (state) => state.user,
   },
 
   mutations: {
     SET_USER(state, user) {
       state.user = user
-      if (user) localStorage.setItem('auth_user', JSON.stringify(user))
-      else localStorage.removeItem('auth_user')
+      if (user && user.id) {
+        localStorage.setItem('auth_user', JSON.stringify(user))
+      } else {
+        localStorage.removeItem('auth_user')
+      }
     },
     CLEAR_USER(state) {
       state.user = null
@@ -29,8 +41,10 @@ const authModule = {
       await api.get('/sanctum/csrf-cookie')
 
       const response = await api.post('/api/login', { email, password })
-      commit('SET_USER', response.data)
-      return response.data
+      const userData = response.data
+
+      commit('SET_USER', userData)
+      return userData
     },
 
     async register({ commit }, { name, email, password, password_confirmation }) {
@@ -42,12 +56,17 @@ const authModule = {
         password,
         password_confirmation,
       })
-      commit('SET_USER', response.data)
-      return response.data
+      const userData = response.data
+
+      commit('SET_USER', userData)
+      return userData
     },
 
     async logout({ commit }) {
-      await api.post('/api/logout')
+      try {
+        await api.post('/api/logout')
+      } catch {
+      }
       commit('CLEAR_USER')
     },
 

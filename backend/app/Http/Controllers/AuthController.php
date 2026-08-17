@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         $data = $request->validated();
 
@@ -26,12 +26,10 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return (new UserResource($user))
-            ->response()
-            ->setStatusCode(201);
+        return response()->json(new UserResource($user), 201);
     }
 
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
 
@@ -43,9 +41,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return (new UserResource(Auth::user()))
-            ->response()
-            ->setStatusCode(200);
+        return response()->json(new UserResource(Auth::user()), 200);
     }
 
     public function logout(Request $request): JsonResponse
