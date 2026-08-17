@@ -43,7 +43,9 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return new UserResource(Auth::user());
+        return (new UserResource(Auth::user()))
+            ->response()
+            ->setStatusCode(200);
     }
 
     public function logout(Request $request): JsonResponse

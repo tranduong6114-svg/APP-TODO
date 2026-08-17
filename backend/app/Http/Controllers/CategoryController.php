@@ -42,7 +42,9 @@ class CategoryController extends Controller
 
         $category->update($request->validated());
 
-        return new CategoryResource($category);
+        return (new CategoryResource($category))
+            ->response()
+            ->setStatusCode(200);
     }
 
     public function destroy(Category $category): JsonResponse

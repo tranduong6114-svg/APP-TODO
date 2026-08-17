@@ -46,7 +46,9 @@ class TaskController extends Controller
         $task->update($request->validated());
         $task->load('category');
 
-        return new TaskResource($task);
+        return (new TaskResource($task))
+            ->response()
+            ->setStatusCode(200);
     }
 
     public function destroy(Task $task): JsonResponse
