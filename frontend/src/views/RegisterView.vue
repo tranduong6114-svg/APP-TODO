@@ -1,15 +1,15 @@
 <template>
-  <div class="login-page">
-    <h1>Login</h1>
+  <div class="register-page">
+    <h1>Register</h1>
     <form @submit.prevent="handleSubmit">
+      <input v-model="form.name" type="text" placeholder="Name" required />
       <input v-model="form.email" type="email" placeholder="Email" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
+      <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password" required />
+      <button type="submit" :disabled="loading">Register</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>
-    <p>Don't have an account? <router-link to="/register">Register</router-link></p>
+    <p>Already have an account? <router-link to="/login">Login</router-link></p>
   </div>
 </template>
 
@@ -22,8 +22,10 @@ const store = useStore()
 const router = useRouter()
 
 const form = ref({
+  name: '',
   email: '',
   password: '',
+  password_confirmation: '',
 })
 const loading = ref(false)
 const error = ref(null)
@@ -33,10 +35,10 @@ const handleSubmit = async () => {
   error.value = null
 
   try {
-    await store.dispatch('auth/login', form.value)
+    await store.dispatch('auth/register', form.value)
     router.push('/dashboard')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Login failed'
+    error.value = err.response?.data?.message || 'Registration failed'
   } finally {
     loading.value = false
   }
@@ -44,7 +46,7 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.login-page {
+.register-page {
   padding: 20px;
 }
 form {
