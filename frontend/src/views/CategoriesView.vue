@@ -1,28 +1,34 @@
 <template>
   <div class="categories-view">
-    <h1>Categories</h1>
+    <h1>Danh sách danh mục</h1>
 
-    <form @submit.prevent="handleCreate" class="create-form">
-      <input v-model="newCategoryName" placeholder="Category name" required />
-      <button type="submit" :disabled="loading">Add</button>
+    <form @submit.prevent="handleCreate" class="create-form" novalidate>
+      <input v-model="newCategoryName" placeholder="Nhập tên danh mục..." />
+      <button type="submit" :disabled="loading">Thêm</button>
     </form>
 
     <ul class="category-list">
       <li v-for="category in categories" :key="category.id">
         <template v-if="editingId === category.id">
           <input v-model="editName" @keyup.enter="handleUpdate(category.id)" />
-          <button @click="handleUpdate(category.id)">Save</button>
-          <button @click="cancelEdit">Cancel</button>
+          <button @click="handleUpdate(category.id)">Lưu</button>
+          <button @click="cancelEdit">Hủy</button>
         </template>
         <template v-else>
           <span>{{ category.name }}</span>
-          <button @click="startEdit(category)">Edit</button>
-          <button @click="handleDelete(category.id)">Delete</button>
+          <button @click="startEdit(category)">Sửa</button>
+          <button @click="handleDelete(category.id)">Xóa</button>
         </template>
       </li>
     </ul>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="categories.length === 0 && !loading" class="empty">
+      Chưa có danh mục nào. Hãy thêm danh mục mới!
+    </p>
+
+    <div v-if="error" class="error-box">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -45,7 +51,6 @@ onMounted(() => {
 })
 
 const handleCreate = async () => {
-  if (!newCategoryName.value.trim()) return
   try {
     await store.dispatch('categories/createCategory', newCategoryName.value)
     newCategoryName.value = ''
@@ -64,7 +69,6 @@ const cancelEdit = () => {
 }
 
 const handleUpdate = async (id) => {
-  if (!editName.value.trim()) return
   try {
     await store.dispatch('categories/updateCategory', { id, name: editName.value })
     editingId.value = null
@@ -74,7 +78,7 @@ const handleUpdate = async (id) => {
 }
 
 const handleDelete = async (id) => {
-  if (!confirm('Delete this category?')) return
+  if (!confirm('Bạn có chắc muốn xóa danh mục này?')) return
   try {
     await store.dispatch('categories/deleteCategory', id)
   } catch {
@@ -119,8 +123,18 @@ const handleDelete = async (id) => {
 .category-list li button {
   padding: 6px 12px;
 }
-.error {
-  color: red;
+.empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+.error-box {
+  color: #b00020;
+  background: #fde8e8;
+  border: 1px solid #f5c2c2;
+  border-radius: 4px;
+  padding: 10px;
   margin-top: 10px;
 }
 </style>

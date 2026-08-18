@@ -1,16 +1,16 @@
 <template>
   <div class="tasks-view">
-    <h1>Tasks</h1>
+    <h1>Danh sách công việc</h1>
 
-    <form @submit.prevent="handleCreate" class="create-form">
-      <input v-model="newTaskTitle" placeholder="Task title" required />
+    <form @submit.prevent="handleCreate" class="create-form" novalidate>
+      <input v-model="newTaskTitle" placeholder="Nhập tiêu đề công việc..." />
       <select v-model="newTaskCategoryId">
-        <option :value="null">No Category</option>
+        <option :value="null">Không có danh mục</option>
         <option v-for="cat in categories" :key="cat.id" :value="cat.id">
           {{ cat.name }}
         </option>
       </select>
-      <button type="submit" :disabled="loading">Add</button>
+      <button type="submit" :disabled="loading">Thêm</button>
     </form>
 
     <ul class="task-list">
@@ -18,24 +18,33 @@
         <template v-if="editingId === task.id">
           <input v-model="editTitle" @keyup.enter="handleUpdate(task.id)" />
           <select v-model="editCategoryId">
-            <option :value="null">No Category</option>
+            <option :value="null">Không có danh mục</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
             </option>
           </select>
-          <button @click="handleUpdate(task.id)">Save</button>
-          <button @click="cancelEdit">Cancel</button>
+          <button @click="handleUpdate(task.id)">Lưu</button>
+          <button @click="cancelEdit">Hủy</button>
         </template>
         <template v-else>
-          <span>{{ task.title }}</span>
+          <span :class="{ done: task.is_completed }">{{ task.title }}</span>
           <span class="category-tag" v-if="task.category">{{ task.category.name }}</span>
-          <button @click="startEdit(task)">Edit</button>
-          <button @click="handleDelete(task.id)">Delete</button>
+          <button @click="toggleComplete(task)">
+            {{ task.is_completed ? 'Hoàn thành' : 'Đánh dấu xong' }}
+          </button>
+          <button @click="startEdit(task)">Sửa</button>
+          <button @click="handleDelete(task.id)">Xóa</button>
         </template>
       </li>
     </ul>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="tasks.length === 0 && !loading" class="empty">
+      Chưa có công việc nào. Hãy thêm công việc mới!
+    </p>
+
+    <div v-if="error" class="error-box">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -64,7 +73,6 @@ onMounted(async () => {
 })
 
 const handleCreate = async () => {
-  if (!newTaskTitle.value.trim()) return
   try {
     await store.dispatch('tasks/createTask', {
       title: newTaskTitle.value,
@@ -89,7 +97,6 @@ const cancelEdit = () => {
 }
 
 const handleUpdate = async (id) => {
-  if (!editTitle.value.trim()) return
   try {
     await store.dispatch('tasks/updateTask', {
       id,
@@ -103,8 +110,20 @@ const handleUpdate = async (id) => {
   }
 }
 
+const toggleComplete = async (task) => {
+  try {
+    await store.dispatch('tasks/updateTask', {
+      id: task.id,
+      title: task.title,
+      category_id: task.category_id,
+      is_completed: !task.is_completed,
+    })
+  } catch {
+  }
+}
+
 const handleDelete = async (id) => {
-  if (!confirm('Delete this task?')) return
+  if (!confirm('Bạn có chắc muốn xóa công việc này?')) return
   try {
     await store.dispatch('tasks/deleteTask', id)
   } catch {
@@ -163,8 +182,22 @@ const handleDelete = async (id) => {
   border-radius: 4px;
   font-size: 12px;
 }
-.error {
-  color: red;
+.done {
+  text-decoration: line-through;
+  color: #888;
+}
+.empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+.error-box {
+  color: #b00020;
+  background: #fde8e8;
+  border: 1px solid #f5c2c2;
+  border-radius: 4px;
+  padding: 10px;
   margin-top: 10px;
 }
 </style>

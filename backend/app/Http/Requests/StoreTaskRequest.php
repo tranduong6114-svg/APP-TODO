@@ -27,4 +27,13 @@ class StoreTaskRequest extends FormRequest
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Vui lòng nhập tiêu đề công việc',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
+            'category_id.exists' => 'Danh mục không tồn tại',
+        ];
+    }
 }

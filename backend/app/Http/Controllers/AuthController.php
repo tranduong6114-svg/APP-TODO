@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -29,13 +29,13 @@ class AuthController extends Controller
         return response()->json(new UserResource($user), 201);
     }
 
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
 
         if (! Auth::attempt($credentials, true)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['Email hoặc mật khẩu không đúng.'],
             ]);
         }
 
@@ -50,6 +50,11 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out']);
+        return response()->json(['message' => 'Đăng xuất thành công']);
+    }
+
+    public function user(Request $request): UserResource
+    {
+        return new UserResource($request->user());
     }
 }

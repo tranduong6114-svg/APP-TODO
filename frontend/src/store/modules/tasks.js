@@ -46,7 +46,7 @@ const tasksModule = {
         const tasksData = response.data.data || response.data
         commit('SET_TASKS', tasksData)
       } catch (error) {
-        commit('SET_ERROR', error.response?.data?.message || 'Failed to fetch tasks')
+        commit('SET_ERROR', error.response?.data?.message || 'Không thể tải danh sách công việc')
         throw error
       } finally {
         commit('SET_LOADING', false)
@@ -54,22 +54,45 @@ const tasksModule = {
     },
 
     async createTask({ commit }, { title, category_id }) {
-      const response = await api.post('/api/tasks', { title, category_id })
-      const taskData = response.data.data || response.data
-      commit('ADD_TASK', taskData)
-      return taskData
+      try {
+        const response = await api.post('/api/tasks', { title, category_id })
+        const taskData = response.data.data || response.data
+        commit('ADD_TASK', taskData)
+        commit('SET_ERROR', null)
+        return taskData
+      } catch (error) {
+        const errors = error.response?.data?.errors
+        const firstError = errors ? Object.values(errors).flat()[0] : null
+        commit('SET_ERROR', firstError || error.response?.data?.message || 'Tạo công việc thất bại')
+        throw error
+      }
     },
 
-    async updateTask({ commit }, { id, title, category_id }) {
-      const response = await api.put(`/api/tasks/${id}`, { title, category_id })
-      const taskData = response.data.data || response.data
-      commit('UPDATE_TASK', taskData)
-      return taskData
+    async updateTask({ commit }, { id, title, category_id, is_completed }) {
+      try {
+        const payload = { title, category_id }
+        if (typeof is_completed === 'boolean') payload.is_completed = is_completed
+        const response = await api.put(`/api/tasks/${id}`, payload)
+        const taskData = response.data.data || response.data
+        commit('UPDATE_TASK', taskData)
+        commit('SET_ERROR', null)
+        return taskData
+      } catch (error) {
+        const errors = error.response?.data?.errors
+        const firstError = errors ? Object.values(errors).flat()[0] : null
+        commit('SET_ERROR', firstError || error.response?.data?.message || 'Cập nhật công việc thất bại')
+        throw error
+      }
     },
 
     async deleteTask({ commit }, id) {
-      await api.delete(`/api/tasks/${id}`)
-      commit('REMOVE_TASK', id)
+      try {
+        await api.delete(`/api/tasks/${id}`)
+        commit('REMOVE_TASK', id)
+      } catch (error) {
+        commit('SET_ERROR', error.response?.data?.message || 'Xóa công việc thất bại')
+        throw error
+      }
     },
   },
 }

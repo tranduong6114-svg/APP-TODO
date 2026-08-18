@@ -1,5 +1,11 @@
 import api from '@/plugins/axios'
 
+import axios from 'axios'
+const csrfApi = axios.create({
+  baseURL: 'http://localhost:8000',
+  withCredentials: true,
+})
+
 const getInitialUser = () => {
   try {
     const stored = localStorage.getItem('auth_user')
@@ -38,9 +44,9 @@ const authModule = {
 
   actions: {
     async login({ commit }, { email, password }) {
-      await api.get('/sanctum/csrf-cookie')
+      await csrfApi.get('/sanctum/csrf-cookie')
 
-      const response = await api.post('/api/login', { email, password })
+      const response = await api.post('/login', { email, password })
       const userData = response.data
 
       commit('SET_USER', userData)
@@ -48,9 +54,9 @@ const authModule = {
     },
 
     async register({ commit }, { name, email, password, password_confirmation }) {
-      await api.get('/sanctum/csrf-cookie')
+      await csrfApi.get('/sanctum/csrf-cookie')
 
-      const response = await api.post('/api/register', {
+      const response = await api.post('/register', {
         name,
         email,
         password,
@@ -64,7 +70,7 @@ const authModule = {
 
     async logout({ commit }) {
       try {
-        await api.post('/api/logout')
+        await api.post('/logout')
       } catch {
       }
       commit('CLEAR_USER')

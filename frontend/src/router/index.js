@@ -9,7 +9,7 @@ import TasksView from '@/views/TasksView.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/login',
+    redirect: '/dashboard',
   },
   {
     path: '/login',
@@ -48,21 +48,24 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters['auth/isAuthenticated']
-
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
+    const isAuthenticated = store.getters['auth/isAuthenticated']
     if (!isAuthenticated) {
-      next({ name: 'login' })
-      return
+      await store.dispatch('auth/fetchUser')
     }
   }
 
-  if (to.matched.some((record) => record.meta.requiresGuest)) {
-    if (isAuthenticated) {
-      next({ name: 'dashboard' })
-      return
-    }
+  const nowAuthenticated = store.getters['auth/isAuthenticated']
+
+  if (to.matched.some((record) => record.meta.requiresAuth) && !nowAuthenticated) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (to.matched.some((record) => record.meta.requiresGuest) && nowAuthenticated) {
+    next({ name: 'dashboard' })
+    return
   }
 
   next()
