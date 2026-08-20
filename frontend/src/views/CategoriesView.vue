@@ -5,7 +5,7 @@
         <span>📁</span>
         Danh sách danh mục
       </h1>
-      <span class="page-count">{{ categories.length }} danh mục</span>
+      <span class="page-count">{{ pagination.total }} danh mục</span>
     </div>
 
     <div class="card">
@@ -92,6 +92,28 @@
       <span>⚠️</span>
       {{ error }}
     </div>
+
+    <div v-if="pagination.last_page > 1" class="pagination">
+      <button
+        @click="changePage(pagination.current_page - 1)"
+        :disabled="loading || pagination.current_page <= 1"
+        class="btn btn-secondary btn-sm"
+      >
+        ‹ Trước
+      </button>
+
+      <span class="pagination-info">
+        Trang {{ pagination.current_page }} / {{ pagination.last_page }}
+      </span>
+
+      <button
+        @click="changePage(pagination.current_page + 1)"
+        :disabled="loading || pagination.current_page >= pagination.last_page"
+        class="btn btn-secondary btn-sm"
+      >
+        Sau ›
+      </button>
+    </div>
   </div>
 </template>
 
@@ -104,6 +126,7 @@ const store = useStore()
 const categories = computed(() => store.state.categories.categories)
 const loading = computed(() => store.state.categories.loading)
 const error = computed(() => store.state.categories.error)
+const pagination = computed(() => store.state.categories.pagination)
 
 const newCategoryName = ref('')
 const editingId = ref(null)
@@ -112,6 +135,11 @@ const editName = ref('')
 onMounted(() => {
   store.dispatch('categories/fetchCategories')
 })
+
+const changePage = async (page) => {
+  await store.dispatch('categories/fetchCategories', page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const handleCreate = async () => {
   if (!newCategoryName.value.trim()) return
@@ -386,5 +414,22 @@ const handleDelete = async (id) => {
   background: var(--danger-light);
   color: var(--danger-hover);
   border: 1px solid var(--danger);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--gray-600);
+  font-weight: 500;
 }
 </style>

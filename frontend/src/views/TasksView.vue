@@ -5,7 +5,7 @@
         <span>📋</span>
         Công việc của tôi
       </h1>
-      <span class="page-count">{{ tasks.length }} công việc</span>
+      <span class="page-count">{{ pagination.total }} công việc</span>
     </div>
 
     <div class="card">
@@ -157,6 +157,28 @@
       <span>⚠️</span>
       {{ error }}
     </div>
+
+    <div v-if="pagination.last_page > 1" class="pagination">
+      <button
+        @click="changePage(pagination.current_page - 1)"
+        :disabled="loading || pagination.current_page <= 1"
+        class="btn btn-secondary btn-sm"
+      >
+        ‹ Trước
+      </button>
+
+      <span class="pagination-info">
+        Trang {{ pagination.current_page }} / {{ pagination.last_page }}
+      </span>
+
+      <button
+        @click="changePage(pagination.current_page + 1)"
+        :disabled="loading || pagination.current_page >= pagination.last_page"
+        class="btn btn-secondary btn-sm"
+      >
+        Sau ›
+      </button>
+    </div>
   </div>
 </template>
 
@@ -170,6 +192,7 @@ const tasks = computed(() => store.state.tasks.tasks)
 const categories = computed(() => store.state.categories.categories)
 const loading = computed(() => store.state.tasks.loading)
 const error = computed(() => store.state.tasks.error)
+const pagination = computed(() => store.state.tasks.pagination)
 
 const newTaskTitle = ref('')
 const newTaskCategoryId = ref(null)
@@ -185,6 +208,11 @@ onMounted(async () => {
     store.dispatch('categories/fetchCategories'),
   ])
 })
+
+const changePage = async (page) => {
+  await store.dispatch('tasks/fetchTasks', page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const handleCreate = async () => {
   if (!newTaskTitle.value.trim()) return
@@ -633,5 +661,22 @@ const formatDateTimeLocal = (dateString) => {
   background: var(--danger-light);
   color: var(--danger-hover);
   border: 1px solid var(--danger);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--gray-600);
+  font-weight: 500;
 }
 </style>

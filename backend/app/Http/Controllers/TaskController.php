@@ -17,7 +17,7 @@ class TaskController extends Controller
         $tasks = Task::with('category')
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return TaskResource::collection($tasks);
     }
