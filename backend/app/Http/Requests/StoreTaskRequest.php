@@ -25,6 +25,7 @@ class StoreTaskRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'is_completed' => ['sometimes', 'boolean'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'deadline' => ['nullable', 'date', 'after_or_equal:yesterday'],
         ];
     }
 
@@ -34,6 +35,8 @@ class StoreTaskRequest extends FormRequest
             'title.required' => 'Vui lòng nhập tiêu đề công việc',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự',
             'category_id.exists' => 'Danh mục không tồn tại',
+            'deadline.date' => 'Ngày hoàn thành không hợp lệ',
+            'deadline.after_or_equal' => 'Ngày hoàn thành phải từ hôm nay trở đi',
         ];
     }
 }

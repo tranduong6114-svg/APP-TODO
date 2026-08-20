@@ -24,10 +24,13 @@ class TaskController extends Controller
 
     public function store(StoreTaskRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+        
         $task = Task::create([
             'user_id' => Auth::id(),
-            'title' => $request->validated()['title'],
-            'category_id' => $request->validated()['category_id'] ?? null,
+            'title' => $validated['title'],
+            'category_id' => $validated['category_id'] ?? null,
+            'deadline' => $validated['deadline'] ?? null,
         ]);
 
         $task->load('category');
@@ -40,7 +43,14 @@ class TaskController extends Controller
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
         if ($task->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json(['message' => 'Bạn không có quyền sửa công việc này'], 403);
+        }
+
+        if ($task->is_completed) {
+            return response()->json([
+                'message' => 'Không thể sửa công việc đã hoàn thành',
+                'errors' => ['general' => ['Công việc đã được đánh dấu hoàn thành, không thể sửa']]
+            ], 422);
         }
 
         $task->update($request->validated());
@@ -49,7 +59,7 @@ class TaskController extends Controller
         return (new TaskResource($task))
             ->response()
             ->setStatusCode(200);
-    }
+    } 
 
     public function destroy(Task $task): JsonResponse
     {

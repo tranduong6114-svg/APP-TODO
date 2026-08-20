@@ -2,14 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
-import DashboardView from '@/views/DashboardView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
 import TasksView from '@/views/TasksView.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard',
+    redirect: '/tasks',
   },
   {
     path: '/login',
@@ -22,12 +21,6 @@ const routes = [
     name: 'register',
     component: RegisterView,
     meta: { requiresGuest: true },
-  },
-  {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: DashboardView,
-    meta: { requiresAuth: true },
   },
   {
     path: '/categories',
@@ -64,7 +57,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.matched.some((record) => record.meta.requiresGuest) && nowAuthenticated) {
-    next({ name: 'dashboard' })
+    next({ name: 'tasks' })
     return
   }
 

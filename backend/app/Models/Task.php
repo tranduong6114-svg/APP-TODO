@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'category_id', 'title', 'is_completed'])]
+#[Fillable(['user_id', 'category_id', 'title', 'is_completed', 'deadline'])]
 class Task extends Model
 {
     /** @use HasFactory<TaskFactory> */
@@ -18,6 +18,7 @@ class Task extends Model
     {
         return [
             'is_completed' => 'boolean',
+            'deadline' => 'datetime'
         ];
     }
 

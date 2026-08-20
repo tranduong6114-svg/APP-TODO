@@ -1,32 +1,95 @@
 <template>
-  <div class="categories-view">
-    <h1>Danh sách danh mục</h1>
+  <div class="page-container">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>📁</span>
+        Danh sách danh mục
+      </h1>
+      <span class="page-count">{{ categories.length }} danh mục</span>
+    </div>
 
-    <form @submit.prevent="handleCreate" class="create-form" novalidate>
-      <input v-model="newCategoryName" placeholder="Nhập tên danh mục..." />
-      <button type="submit" :disabled="loading">Thêm</button>
-    </form>
+    <div class="card">
+      <form @submit.prevent="handleCreate" class="create-form" novalidate>
+        <input
+          v-model="newCategoryName"
+          placeholder="Nhập tên danh mục mới..."
+          class="form-input"
+        />
+        <button
+          type="submit"
+          :disabled="loading || !newCategoryName.trim()"
+          class="btn btn-primary"
+        >
+          <span>➕</span>
+          Thêm
+        </button>
+      </form>
+    </div>
 
-    <ul class="category-list">
-      <li v-for="category in categories" :key="category.id">
+    <div v-if="loading && categories.length === 0" class="empty-state">
+      <div class="loading-spinner"></div>
+      <p>Đang tải danh mục...</p>
+    </div>
+
+    <div v-else-if="categories.length === 0" class="empty-state">
+      <span class="empty-icon">📂</span>
+      <p>Chưa có danh mục nào</p>
+      <p class="empty-hint">Hãy thêm danh mục mới bên trên!</p>
+    </div>
+
+    <ul v-else class="item-list">
+      <li v-for="category in categories" :key="category.id" class="item-card">
         <template v-if="editingId === category.id">
-          <input v-model="editName" @keyup.enter="handleUpdate(category.id)" />
-          <button @click="handleUpdate(category.id)">Lưu</button>
-          <button @click="cancelEdit">Hủy</button>
+          <input
+            v-model="editName"
+            @keyup.enter="handleUpdate(category.id)"
+            class="form-input"
+          />
+          <button
+            @click="handleUpdate(category.id)"
+            :disabled="loading || !editName.trim()"
+            class="btn btn-primary btn-sm"
+          >
+            Lưu
+          </button>
+          <button
+            @click="cancelEdit"
+            :disabled="loading"
+            class="btn btn-secondary btn-sm"
+          >
+            Hủy
+          </button>
         </template>
+
         <template v-else>
-          <span>{{ category.name }}</span>
-          <button @click="startEdit(category)">Sửa</button>
-          <button @click="handleDelete(category.id)">Xóa</button>
+          <div class="item-info">
+            <span class="item-icon">📂</span>
+            <span class="item-name">{{ category.name }}</span>
+          </div>
+          <div class="item-actions">
+            <button
+              @click="startEdit(category)"
+              :disabled="loading"
+              class="btn-icon btn-icon-warning"
+              title="Sửa"
+            >
+              ✏️
+            </button>
+            <button
+              @click="handleDelete(category.id)"
+              :disabled="loading"
+              class="btn-icon btn-icon-danger"
+              title="Xóa"
+            >
+              🗑️
+            </button>
+          </div>
         </template>
       </li>
     </ul>
 
-    <p v-if="categories.length === 0 && !loading" class="empty">
-      Chưa có danh mục nào. Hãy thêm danh mục mới!
-    </p>
-
-    <div v-if="error" class="error-box">
+    <div v-if="error" class="alert alert-error">
+      <span>⚠️</span>
       {{ error }}
     </div>
   </div>
@@ -51,26 +114,30 @@ onMounted(() => {
 })
 
 const handleCreate = async () => {
+  if (!newCategoryName.value.trim()) return
   try {
-    await store.dispatch('categories/createCategory', newCategoryName.value)
+    await store.dispatch('categories/createCategory', newCategoryName.value.trim())
     newCategoryName.value = ''
   } catch {
   }
 }
 
 const startEdit = (category) => {
+  if (loading.value) return
   editingId.value = category.id
   editName.value = category.name
 }
 
 const cancelEdit = () => {
+  if (loading.value) return
   editingId.value = null
   editName.value = ''
 }
 
 const handleUpdate = async (id) => {
+  if (!editName.value.trim()) return
   try {
-    await store.dispatch('categories/updateCategory', { id, name: editName.value })
+    await store.dispatch('categories/updateCategory', { id, name: editName.value.trim() })
     editingId.value = null
     editName.value = ''
   } catch {
@@ -78,6 +145,7 @@ const handleUpdate = async (id) => {
 }
 
 const handleDelete = async (id) => {
+  if (loading.value) return
   if (!confirm('Bạn có chắc muốn xóa danh mục này?')) return
   try {
     await store.dispatch('categories/deleteCategory', id)
@@ -87,54 +155,236 @@ const handleDelete = async (id) => {
 </script>
 
 <style scoped>
-.categories-view {
-  padding: 20px;
-}
-.create-form {
+.page-container {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: var(--space-md);
 }
-.create-form input {
-  padding: 8px;
-  flex: 1;
-}
-.create-form button {
-  padding: 8px 16px;
-}
-.category-list {
-  list-style: none;
-  padding: 0;
-}
-.category-list li {
+
+.page-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
 }
-.category-list li span {
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.page-count {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-md);
+}
+
+.create-form {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.create-form .form-input {
   flex: 1;
 }
-.category-list li input {
-  padding: 6px;
-  flex: 1;
+
+.form-input {
+  padding: 10px 14px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: border-color 0.15s ease;
 }
-.category-list li button {
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
   padding: 6px 12px;
+  font-size: 13px;
 }
-.empty {
-  color: #888;
-  font-style: italic;
-  text-align: center;
-  padding: 20px;
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
 }
-.error-box {
-  color: #b00020;
-  background: #fde8e8;
-  border: 1px solid #f5c2c2;
-  border-radius: 4px;
-  padding: 10px;
-  margin-top: 10px;
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--gray-300);
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  list-style: none;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease;
+}
+
+.item-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.item-icon {
+  font-size: 20px;
+}
+
+.item-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.item-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-icon-warning {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.btn-icon-warning:hover:not(:disabled) {
+  background: var(--warning);
+  color: white;
+}
+
+.btn-icon-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.btn-icon-danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  color: var(--gray-500);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-sm);
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-top: var(--space-xs);
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 14px;
+}
+
+.alert-error {
+  background: var(--danger-light);
+  color: var(--danger-hover);
+  border: 1px solid var(--danger);
 }
 </style>
